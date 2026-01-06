@@ -1,27 +1,235 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hoşgeldin</title>
-    <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background: linear-gradient(to right, #6a11cb, #2575fc);
-            font-family: Arial, sans-serif;
-            color: white;
-        }
-        h1 {
-            font-size: 10vw; /* Ekrana göre büyük yazı */
-            text-shadow: 3px 3px 10px rgba(0,0,0,0.5);
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Online Alışveriş Anketi — Olasılık</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    *,*::before,*::after{box-sizing:border-box;}
+    html,body{height:100%;margin:0;font-family:'Inter', system-ui, -apple-system, "Segoe UI", Roboto, Arial; background:#f0f2f5; color:#111827;}
+    .wrap{max-width:800px;margin:30px auto;padding:0 15px;}
+    .card{background:#fff;border-radius:16px;padding:30px;box-shadow:0 12px 25px rgba(0,0,0,0.08); transition: transform 0.2s;}
+    .card:hover{transform: translateY(-4px);}
+    h1{margin:0;font-size:26px; color:#1e293b;}
+    .lead{color:#475569;margin-top:8px;font-size:15px;}
+    label{display:block;margin-top:18px;font-weight:600;color:#1e293b;}
+    .hint{font-size:13px;color:#64748b;margin-top:4px;}
+    input[type="text"], input[type="number"], select, textarea{
+      width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:12px;margin-top:6px;font-size:15px;
+      background:#f8fafc; transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    input[type="text"]:focus, input[type="number"]:focus, select:focus, textarea:focus{
+      border-color:#3b82f6; box-shadow:0 0 0 3px rgba(59,130,246,0.2); outline:none;
+    }
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px;}
+    @media (max-width:600px){ .grid{grid-template-columns:1fr;} }
+    .btn{margin-top:22px;padding:14px 20px;background:#3b82f6;color:#fff;border-radius:12px;border:0;font-weight:700;cursor:pointer;transition: background 0.2s;}
+    .btn:hover{background:#2563eb;}
+    .small{font-size:13px;color:#64748b;margin-top:6px;}
+    .kpi{margin-top:16px;padding:12px;border-radius:12px;background:#e2e8f0;color:#1e293b;font-weight:600;text-align:center;}
+    iframe[name="hidden_iframe"]{display:none;}
+    .footer-note{font-size:13px;color:#475569;margin-top:20px;text-align:center;}
+    .small-label { font-size:15px; line-height:1.5; }
+
+    /* -------- OVERLAY + SPINNER -------- */
+    #overlay {
+      position: fixed;
+      left: 0; top: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.35);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      flex-direction: column;
+      text-align: center;
+    }
+    #overlay .panel {
+      background: rgba(255,255,255,0.02);
+      padding: 22px 28px;
+      border-radius: 12px;
+      backdrop-filter: blur(3px);
+      min-width: 220px;
+    }
+    .spinner {
+      width:48px; height:48px; border-radius:50%;
+      border:6px solid rgba(255,255,255,0.18);
+      border-top-color: #ffffff;
+      animation: spin 0.9s linear infinite;
+      margin: 0 auto 10px auto;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+    }
+    @keyframes spin{ to { transform: rotate(360deg); } }
+    #overlay .text { font-family: Inter, Arial; font-weight:600; font-size:15px; color:#fff; margin-top: 10px; }
+    /* ------------------------------------ */
+
+    #msg {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #22c55e;
+      color: #fff;
+      padding: 16px 24px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 16px;
+      z-index: 10000;
+      text-align: center;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    }
+  </style>
 </head>
 <body>
-    <h1>Hoşgeldin!</h1>
+  <div class="wrap">
+    <div class="card">
+      <h1>Online Alışveriş Anketi</h1>
+      <p class="lead">Kısa, anonim — yaklaşık 1–2 dakika. Lütfen dürüst cevap verin.</p>
+
+      <iframe name="hidden_iframe"></iframe>
+
+      <form method="post" action="https://script.google.com/macros/s/AKfycbyyXveh82cnx_hyDBgIPSVlhDVpnrIHGRG35bvvgiJcnidaggUq_VR3wAyuIlz2_JnE/exec" target="hidden_iframe" id="surveyForm" autocomplete="off">
+
+        <!-- 1) Yaş -->
+        <label>1) Yaş</label>
+        <select name="age_range" required>
+          <option value="">Seçiniz</option>
+          <script>for(let i=18;i<=65;i++){document.write(`<option>${i}</option>`);}</script>
+        </select>
+
+        <!-- 2) Cinsiyet -->
+        <label>2) Cinsiyet</label>
+        <select name="gender" required>
+          <option value="">Seçiniz</option>
+          <option>Erkek</option><option>Kadın</option>
+        </select>
+
+        <!-- 3) Şehir -->
+        <label>3) Hangi şehirde yaşıyorsunuz?</label>
+        <select name="city" required>
+          <option value="">Seçiniz</option>
+          <option>Adana</option><option>Adıyaman</option><option>Afyonkarahisar</option><option>Ağrı</option><option>Aksaray</option><option>Amasya</option><option>Ankara</option>
+          <option>Antalya</option><option>Artvin</option><option>Aydın</option><option>Balıkesir</option><option>Bilecik</option>
+          <option>Bingöl</option><option>Bitlis</option><option>Bolu</option><option>Burdur</option><option>Bursa</option>
+          <option>Çanakkale</option><option>Çankırı</option><option>Çorum</option><option>Denizli</option><option>Diyarbakır</option>
+          <option>Edirne</option><option>Elazığ</option><option>Erzincan</option><option>Erzurum</option><option>Eskişehir</option>
+          <option>Gaziantep</option><option>Giresun</option><option>Gümüşhane</option><option>Hakkâri</option><option>Hatay</option>
+          <option>Isparta</option><option>Mersin</option><option>İstanbul</option><option>İzmir</option><option>Kars</option>
+          <option>Kastamonu</option><option>Kayseri</option><option>Kırıkkale</option><option>Kırklareli</option><option>Kırşehir</option><option>Kilis</option>
+          <option>Kocaeli</option><option>Konya</option><option>Kütahya</option><option>Malatya</option><option>Manisa</option>
+          <option>Kahramanmaraş</option><option>Mardin</option><option>Muğla</option><option>Muş</option><option>Nevşehir</option>
+          <option>Niğde</option><option>Ordu</option><option>Rize</option><option>Sakarya</option><option>Samsun</option>
+          <option>Siirt</option><option>Sinop</option><option>Sivas</option><option>Şanlıurfa</option><option>Şırnak</option>
+          <option>Tekirdağ</option><option>Tokat</option><option>Trabzon</option><option>Tunceli</option>
+          <option>Uşak</option><option>Van</option><option>Yozgat</option><option>Zonguldak</option><option>Aksaray</option>
+          <option>Bayburt</option><option>Karaman</option><option>Batman</option><option>Bartın</option><option>Ardahan</option>
+          <option>Iğdır</option><option>Yalova</option><option>Karabük</option><option>Osmaniye</option><option>Diğer</option>
+        </select>
+
+        <!-- 4) Aylık kişisel geliriniz (artık zorunlu) -->
+        <label>4) Aylık kişisel geliriniz (TL)</label>
+        <input type="number" name="income" placeholder="Örn: 4500 TL" min="0" step="1" required>
+
+        <!-- 5) En sık kullandığınız platform -->
+        <label>5) En sık kullandığınız platform</label>
+        <select name="platform" required>
+          <option value="">Seçiniz</option>
+          <option>Trendyol</option><option>Hepsiburada</option><option>n11</option><option>Amazon Türkiye</option>
+          <option>Gittigidiyor</option><option>Sahibinden</option><option>Migros Sanal Market</option><option>Getir</option>
+          <option>Yemeksepeti / Market</option><option>ÇiçekSepeti</option><option>Diğer</option>
+        </select>
+
+        <div class="grid">
+          <div>
+            <label class="small-label">6) Son 1 ayda kaç kez online alışveriş yaptınız?</label>
+            <select name="monthly_freq" required>
+              <option value="">Seçiniz</option>
+              <option>0</option><option>1-2</option><option>3-5</option><option>6-10</option><option>10+</option>
+            </select>
+          </div>
+          <div>
+            <label>7) Ortalama sipariş başı harcama (TL)</label>
+            <select name="avg_spend_band" required>
+              <option value="">Seçiniz</option>
+              <option>0-500</option><option>501-1500</option><option>1501-3000</option><option>3001-7000</option><option>7001+</option>
+            </select>
+          </div>
+        </div>
+
+        <label>8) Kupon/indirim kullanma sıklığınız</label>
+        <select name="coupon_freq" required><option value="">Seçiniz</option><option>Hiç</option><option>Nadiren (ayda 1-2)</option><option>Bazen (3-5)</option><option>Sık (6+)</option></select>
+
+        <label>9) Satın almadan önce ürün yorumlarını okur musunuz?</label>
+        <select name="read_reviews" required><option value="">Seçiniz</option><option>Her zaman</option><option>Bazen</option><option>Hiç</option></select>
+
+        <label>10) Dürtüsellik — 1 (hiç) → 5 (çok)</label>
+        <div class="grid">
+          <input type="number" name="imp_m1" min="1" max="5" placeholder="Genelde hızlı karar veririm (1-5)" required oninput="let val=parseInt(this.value); if(val>5) val=5; if(val<1) val=1; this.value=val;">
+          <input type="number" name="imp_m2" min="1" max="5" placeholder="İyi fırsat görünce anında alırım (1-5)" required oninput="let val=parseInt(this.value); if(val>5) val=5; if(val<1) val=1; this.value=val;">
+          <input type="number" name="imp_m3" min="1" max="5" placeholder="Sepetteki ürünleri kısa sürede tamamlarım (1-5)" required oninput="let val=parseInt(this.value); if(val>5) val=5; if(val<1) val=1; this.value=val;">
+          <input type="number" name="imp_m4" min="1" max="5" placeholder="Duygular seçimimi etkiler (1-5)" required oninput="let val=parseInt(this.value); if(val>5) val=5; if(val<1) val=1; this.value=val;">
+        </div>
+
+        <label>11) Satın alırken en önemli faktör</label>
+        <select name="main_factor" required>
+          <option value="">Seçiniz</option>
+          <option>Ücretsiz kargo</option><option>İndirim / Kupon</option><option>Ürün yorumları</option><option>Hızlı kargo</option><option>Kolay iade</option>
+        </select>
+
+        <label class="small"><input type="checkbox" name="consent" value="Evet" required> Bu anket ödev amaçlıdır ve anonimdir. Onaylıyorum.</label>
+
+        <button class="btn" type="submit">Gönder</button>
+        <div class="kpi">Tahmini süre: 1–2 dakika · Anonim</div>
+      </form>
+
+      <p class="footer-note">© 2025 Gökhan ÖZTATAR — olasılık.com</p>
+    </div>
+  </div>
+
+  <div id="overlay" aria-hidden="true">
+    <div class="spinner" role="status" aria-hidden="true"></div>
+    <div class="text">Gönderiliyor… Lütfen bekleyin</div>
+  </div>
+
+  <div id="msg">Cevabınız kaydedildi — teşekkürler! ✅</div>
+
+<script>
+  (function(){
+    var form = document.getElementById('surveyForm');
+    var overlay = document.getElementById('overlay');
+    var msg = document.getElementById('msg');
+    var btn = form.querySelector('button[type="submit"]');
+    var iframe = document.querySelector('iframe[name="hidden_iframe"]');
+
+    form.addEventListener('submit', function(e){
+      // Basit extra client-side kontrol: required alanların dolu olduğundan emin olmak için
+      if(!form.checkValidity()){
+        // HTML5 built-in validation message'larını göster
+        form.reportValidity();
+        return;
+      }
+
+      btn.disabled = true;
+      btn.style.opacity = 0.6;
+      overlay.style.display = 'flex';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    iframe.addEventListener('load', function(){
+      overlay.style.display = 'none';
+      btn.disabled = false;
+      btn.style.opacity = 1;
+      form.reset();
+
+      msg.style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      setTimeout(function(){ msg.style.display = 'none'; }, 3000);
+    });
+  })();
+</script>
 </body>
 </html>
